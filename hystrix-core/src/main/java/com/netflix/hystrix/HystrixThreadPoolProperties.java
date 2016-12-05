@@ -63,7 +63,7 @@ public abstract class HystrixThreadPoolProperties {
     private final HystrixProperty<Integer> keepAliveTime;
     private final HystrixProperty<Integer> maxQueueSize;
     private final HystrixProperty<Integer> queueSizeRejectionThreshold;
-    private final boolean allowMaximumSizeToDivergeFromCoreSize;
+    private final HystrixProperty<Boolean> allowMaximumSizeToDivergeFromCoreSize;
 
     private final HystrixProperty<Integer> threadPoolRollingNumberStatisticalWindowInMilliseconds;
     private final HystrixProperty<Integer> threadPoolRollingNumberStatisticalWindowBuckets;
@@ -77,34 +77,33 @@ public abstract class HystrixThreadPoolProperties {
     }
 
     protected HystrixThreadPoolProperties(HystrixThreadPoolKey key, Setter builder, String propertyPrefix) {
-        this.allowMaximumSizeToDivergeFromCoreSize = getValueOnce(propertyPrefix, key, "allowMaximumSizeToDivergeFromCoreSize",
+        this.allowMaximumSizeToDivergeFromCoreSize = getBooleanProperty(propertyPrefix, key, "allowMaximumSizeToDivergeFromCoreSize",
                 builder.getAllowMaximumSizeToDivergeFromCoreSize(), default_allow_maximum_size_to_diverge_from_core_size);
 
-        this.corePoolSize = getProperty(propertyPrefix, key, "coreSize", builder.getCoreSize(), default_coreSize);
+        this.corePoolSize = getIntegerProperty(propertyPrefix, key, "coreSize", builder.getCoreSize(), default_coreSize);
         //this object always contains a reference to the configuration value for the maximumSize of the threadpool
         //it only gets applied if allowMaximumSizeToDivergeFromCoreSize is true
-        this.maximumPoolSize = getProperty(propertyPrefix, key, "maximumSize", builder.getMaximumSize(), default_maximumSize);
+        this.maximumPoolSize = getIntegerProperty(propertyPrefix, key, "maximumSize", builder.getMaximumSize(), default_maximumSize);
 
-        this.keepAliveTime = getProperty(propertyPrefix, key, "keepAliveTimeMinutes", builder.getKeepAliveTimeMinutes(), default_keepAliveTimeMinutes);
-        this.maxQueueSize = getProperty(propertyPrefix, key, "maxQueueSize", builder.getMaxQueueSize(), default_maxQueueSize);
-        this.queueSizeRejectionThreshold = getProperty(propertyPrefix, key, "queueSizeRejectionThreshold", builder.getQueueSizeRejectionThreshold(), default_queueSizeRejectionThreshold);
-        this.threadPoolRollingNumberStatisticalWindowInMilliseconds = getProperty(propertyPrefix, key, "metrics.rollingStats.timeInMilliseconds", builder.getMetricsRollingStatisticalWindowInMilliseconds(), default_threadPoolRollingNumberStatisticalWindow);
-        this.threadPoolRollingNumberStatisticalWindowBuckets = getProperty(propertyPrefix, key, "metrics.rollingStats.numBuckets", builder.getMetricsRollingStatisticalWindowBuckets(), default_threadPoolRollingNumberStatisticalWindowBuckets);
+        this.keepAliveTime = getIntegerProperty(propertyPrefix, key, "keepAliveTimeMinutes", builder.getKeepAliveTimeMinutes(), default_keepAliveTimeMinutes);
+        this.maxQueueSize = getIntegerProperty(propertyPrefix, key, "maxQueueSize", builder.getMaxQueueSize(), default_maxQueueSize);
+        this.queueSizeRejectionThreshold = getIntegerProperty(propertyPrefix, key, "queueSizeRejectionThreshold", builder.getQueueSizeRejectionThreshold(), default_queueSizeRejectionThreshold);
+        this.threadPoolRollingNumberStatisticalWindowInMilliseconds = getIntegerProperty(propertyPrefix, key, "metrics.rollingStats.timeInMilliseconds", builder.getMetricsRollingStatisticalWindowInMilliseconds(), default_threadPoolRollingNumberStatisticalWindow);
+        this.threadPoolRollingNumberStatisticalWindowBuckets = getIntegerProperty(propertyPrefix, key, "metrics.rollingStats.numBuckets", builder.getMetricsRollingStatisticalWindowBuckets(), default_threadPoolRollingNumberStatisticalWindowBuckets);
     }
 
-    private static HystrixProperty<Integer> getProperty(String propertyPrefix, HystrixThreadPoolKey key, String instanceProperty, Integer builderOverrideValue, Integer defaultValue) {
+    private static HystrixProperty<Integer> getIntegerProperty(String propertyPrefix, HystrixThreadPoolKey key, String instanceProperty, Integer builderOverrideValue, Integer defaultValue) {
         return forInteger()
                 .add(propertyPrefix + ".threadpool." + key.name() + "." + instanceProperty, builderOverrideValue)
                 .add(propertyPrefix + ".threadpool.default." + instanceProperty, defaultValue)
                 .build();
     }
 
-    private static boolean getValueOnce(String propertyPrefix, HystrixThreadPoolKey key, String instanceProperty, boolean builderOverrideValue, boolean defaultValue) {
+    private static HystrixProperty<Boolean> getBooleanProperty(String propertyPrefix, HystrixThreadPoolKey key, String instanceProperty, boolean builderOverrideValue, boolean defaultValue) {
         return forBoolean()
                 .add(propertyPrefix + ".threadpool." + key.name() + "." + instanceProperty, builderOverrideValue)
                 .add(propertyPrefix + ".threadpool.default." + instanceProperty, defaultValue)
-                .build()
-                .get();
+                .build();
     }
 
     /**
@@ -158,7 +157,7 @@ public abstract class HystrixThreadPoolProperties {
         return queueSizeRejectionThreshold;
     }
 
-    public boolean getAllowMaximumSizeToDivergeFromCoreSize() {
+    public HystrixProperty<Boolean> getAllowMaximumSizeToDivergeFromCoreSize() {
         return allowMaximumSizeToDivergeFromCoreSize;
     }
 
